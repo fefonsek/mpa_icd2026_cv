@@ -1,0 +1,22 @@
+DAY,MONTH,MANUFACTURER,PRODUCT,SHIFT,COLOR,MALTING,TASTING
+1,4,Leonard,Junglivet,Morning,0.27,Inhouse,895
+1,4,Carlson,Junglivet Premium,Evening,0.27,Burns Best Ltd.,879
+2,4,Leonard,Junglivet,Morning,0.28,Inhouse,938
+2,4,Carlson,Junglivet,Evening,0.32,Inhouse,900
+3,4,Leonard,Junglivet,Morning,0.32,Matro Ltd.,917
+3,4,Carlson,Junglivet,Evening,0.28,Inhouse,900
+4,4,Leonard,Junglivet,Morning,0.29,Inhouse,934
+4,4,Gumble,Junglivet Premium,Evening,0.29,Matro Ltd.,951
+5,4,Leonard,Junglivet,Morning,0.33,Matro Ltd.,852
+5,4,Carlson,Junglivet,Evening,0.27,Inhouse,850
+,,,,,,,
+6,4,Carlson,Junglivet,Morning,0.3,Inhouse,991
+6,4,Leonard,Junglivet Premium,Evening,0.31,Inhouse,950
+7,4,Carlson,Junglivet,Morning,0.26,Burns Best Ltd.,863
+7,4,Leonard,Junglivet Premium,Evening,0.31,Burns Best Ltd.,936
+8,4,Gumble,Junglivet Premium,Morning,0.3,Burns Best Ltd.,996
+8,4,Leonard,Junglivet Premium,Evening,0.3,Matro Ltd.,978
+9,4,Carlson,Junglivet Premium,Morning,0.3,Inhouse,989
+9,4,Leonard,Junglivet Premium,Evening,0.3,Inhouse,999
+10,4,Carlson,Junglivet,Morning,0.35,Burns Best Ltd.,831
+10,4,Leonard,Junglivet,Evening,0.26,Matro Ltd.,822
