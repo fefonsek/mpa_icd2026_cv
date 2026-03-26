@@ -2,8 +2,8 @@
 # Disciplina: Introdução à Ciência de Dados
 # ============================================================
 # Arquivo: 01_introducao.R
-# Autor(a): seu nome
-# Data: dd/mm/aaaa
+# Autor(a): Felipe Fonseca
+# Data: 26/03/2026
 # Objetivos: Aprender RStudio, script R e alguns fundamentos da linguagem R
 
 # Atalho para criar seções de código: CTRL + SHIFT + R
@@ -279,7 +279,7 @@ dados_vendas_limpos |>
 # Pergunta de negócio: quero apenas as colunas cidade e receita
 
 dados_vendas_limpos |>
-  select(cidade, receita)
+  select(-cidade,-receita)
 
 
 # Exemplo 4
@@ -344,6 +344,9 @@ caminho_rds <- here("data/clean/dados_vendas_limpos.rds")
 
 # importa o arquivo rds com a função read_rds do pacote readr
 dados_vendas_limpos <- readr::read_rds(caminho_rds)
+
+# exibe  o objeto
+glimpse(dados_vendas_limpos)
 
 
 # Exercício 1
