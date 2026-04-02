@@ -1,0 +1,6 @@
+codigo_negociacao,empresa,indice_governanca,tipo_controlador,comite_auditoria
+PETR4,Petrobras,6.8,Estatal,TRUE
+VALE3,Vale,8.2,Pulverizado,TRUE
+ITUB4,Itaú Unibanco,7.9,Familiar,TRUE
+BBDC4,Bradesco,7.6,Familiar,TRUE
+MGLU3,Magazine Luiza,7.1,Familiar,FALSE
