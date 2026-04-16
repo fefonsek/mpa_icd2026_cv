@@ -177,3 +177,72 @@ analise_projeto
 
 
 # Exercício 7 (Desafio) --------------------------------------
+
+calcular_vpl <- function(investimento_inicial,
+                         fluxos,
+                         taxa_desconto,
+                         valor_residual = 0) {
+  
+  periodos <- seq_along(fluxos)
+  
+  valor_presente_fluxos <- sum(
+    fluxos / (1 + taxa_desconto)^periodos
+  )
+  
+  valor_presente_residual <- 
+    valor_residual / (1 + taxa_desconto)^length(fluxos)
+  
+  vpl <- valor_presente_fluxos +
+    valor_presente_residual -
+    investimento_inicial
+  
+  return(vpl)
+}
+
+set.seed(123)
+
+vpl_sim <- map_dbl(1:1000, \(i) {
+  
+  # gerar fluxos aleatórios
+  fluxos <- rnorm(
+    3,
+    mean = 80000,
+    sd = 15000
+  )
+  
+  # calcular VPL do cenário
+  calcular_vpl(
+    investimento_inicial = 200000,
+    fluxos = fluxos,
+    taxa_desconto = 0.10,
+    valor_residual = 20000
+  )
+})
+
+vpl_medio <- mean(vpl_sim)
+vpl_medio
+
+prob_vpl_positivo <- mean(vpl_sim > 0)
+prob_vpl_positivo
+
+quantis <- quantile(vpl_sim, probs = c(0.05, 0.95))
+quantis
+
+resultado_simulacao <- tibble(
+  vpl_medio = vpl_medio,
+  probabilidade_vpl_positivo = prob_vpl_positivo,
+  p5 = quantis[1],
+  p95 = quantis[2]
+)
+
+resultado_simulacao
+
+tibble(vpl = vpl_sim) |>
+  ggplot(aes(vpl)) +
+  geom_histogram(bins = 40) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  labs(
+    title = "Distribuição do VPL — Simulação Monte Carlo",
+    x = "VPL",
+    y = "Frequência"
+  )
