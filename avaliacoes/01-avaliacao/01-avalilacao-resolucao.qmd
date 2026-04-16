@@ -1,0 +1,200 @@
+---
+title: "Exercícios da Aula 7"
+subtitle: "Econometria II"
+author: "Felipe Fonseca"
+lang: pt-BR
+date: today
+format:
+  html:
+    theme: flatly
+    embed-resources: true
+    toc: true
+execute: 
+  echo: true
+  warning: false
+  message: false
+---
+
+# Questão 1
+
+Análise de Desempenho de Cooperativa de Crédito (17 pontos)
+
+A CoopCredMinas é uma cooperativa de crédito que atua em cidades do Centro-Oeste e da Região Metropolitana de Minas Gerais. A diretoria solicitou uma análise descritiva de desempenho de suas agências no ano de 2025, visando identificar oportunidades de melhoria e agências que necessitam de atenção especial quanto ao risco de inadimplência.
+
+Os três arquivos disponíveis são:
+
+- agencias.csv — Dados cadastrais das 7 agências da cooperativa (código, nome, cidade, número de cooperados e tipo da agência).
+- credito_trimestral.csv — Volume de crédito concedido por agência em cada trimestre de 2025 (em R$ mil), organizado em formato wide (largo): cada trimestre é uma coluna separada (T1, T2, T3, T4).
+- inadimplencia.csv — Taxa de inadimplência (%) por agência e por trimestre, já organizado em formato long (longo).
+
+
+```{r}
+
+# Configurações globais  ----------------------------------------
+
+# define opções globais para exibição de números
+options(digits = 5, scipen = 999)
+
+# carrega os pacotes necessários
+
+library(tidyverse)
+library(here)
+
+```
+
+## A (2 pontos)
+
+Carregue os pacotes tidyverse e here nas linhas indicadas no script de resolução. Em seguida, importe os três arquivos CSV utilizando here() e read_csv(), salvando-os em objetos chamados agencias, credito e inadimplencia. Inspecione cada objeto com glimpse().
+
+Dica:
+Salve o caminho relativo de cada arquivo em diferentes objetos (ex: agencias_csv, credito_csv, inadimplencia_csv) antes de importá-lo com read_csv().
+
+
+```{r}
+
+# importar a planilha com as agências
+agencias_csv <- here("data/raw/agencias.csv")
+agencia <- read.csv(agencias_csv)
+glimpse(agencia)
+
+# importar a planilha com os creditos trimestrais
+credito_csv <- here("data/raw/credito_trimestral.csv")
+credito <- read.csv(credito_csv)
+glimpse(credito)
+
+# importar a planilha com as inadimplencias
+inadimplencia_csv <- here("data/raw/inadimplencia.csv")
+inadimplencia <- read.csv(inadimplencia_csv)
+glimpse(inadimplencia)
+
+```
+
+## B (3 pontos)
+
+O arquivo credito_trimestral.csv está em formato desorganizado (wide) para análise. Reorganize esses dados para o formato long utilizando a função pivot_longer(). O novo objeto deve conter as seguintes colunas:
+
+- codigo_agencia
+- trimestre
+- volume_credito
+
+Salve o resultado em um objeto chamado credito_long. Em seguida, imprima o objeto no console para verificar o resultado.
+
+
+```{r}
+
+credito_long <- credito |> 
+  pivot_longer(
+    cols = c("T1", "T2", "T3", "T4"), # colunas que serão valores da nova coluna
+    names_to = "trimestre", # nome da nova coluna
+    values_to = "volume_credito" # nome de outra nova coluna
+  )
+credito_long
+
+```
+
+## C (4 pontos)
+
+O objetivo deste item é reunir todas as informações em um único objeto. Como queremos manter todas as observações trimestrais de crédito e acrescentar a elas as informações cadastrais e de inadimplência, utilizamos a função left_join().
+
+Observe que credito_long e agencias possuem uma coluna em comum (codigo_agencia) que permite a combinação. Já inadimplencia possui duas colunas em comum com credito_long: codigo_agencia e trimestre — ambas devem ser usadas como chave no segundo join.
+
+Encadeie os dois joins em um único pipeline com o operador |> e salve o resultado em um objeto chamado dados_completos. Em seguida, imprima o objeto no console para verificar o resultado.
+
+Dica: estrutura do pipeline
+
+```{r}
+# dados_completos <- credito_long |>
+#  left_join(___, by = "___") |>
+#  left_join(___, by = c("___", "___"))
+```
+
+```{r}
+
+glimpse(agencia)
+glimpse(inadimplencia)
+
+dados_completos <- credito_long |>
+  left_join(agencia, by = "codigo_agencia") |>
+  left_join(inadimplencia, by = c("codigo_agencia", "trimestre"))
+dados_completos
+
+
+```
+
+## D (4 pontos)
+
+Utilizando o objeto dados_completos, crie duas novas variáveis com a função mutate():
+
+credito_por_cooperado: volume de crédito por cooperado em R$, calculado como: volume_credito * 1000 / num_cooperados
+
+risco: classificação do risco de inadimplência com base na coluna taxa_inadimplencia, utilizando case_when() ou ifelse():
+
+- taxa_inadimplencia 3.0 → "Baixo"
+- taxa_inadimplencia 3.0 e 4.5 → "Moderado"
+- taxa_inadimplencia 4.5 → "Alto"
+
+Salve o resultado em um objeto chamado dados_analise. Em seguida, imprima o objeto no console para verificar o resultado.
+
+
+```{r}
+
+# 1. criando variável de volume de crédito por cooperado em R$
+credito_por_cooperado = dados_completos |> 
+  mutate(credito_por_cooperado = volume_credito * 1000 / num_cooperados)
+glimpse(credito_por_cooperado)
+
+# 2. Classificando o  risco de inadimplência com base na coluna taxa_inadimplencia
+risco <- credito_por_cooperado |> 
+  mutate(risco = case_when(
+    taxa_inadimplencia < 3.0 ~ "Baixo",
+    taxa_inadimplencia >= 3.0 & taxa_inadimplencia < 4.5 ~ "Moderado",
+    taxa_inadimplencia >= 4.5 ~ "Alto"
+  ))
+glimpse(risco)
+
+dados_analise <- risco
+dados_analise
+
+```
+
+## E (4 pontos)
+
+A diretoria da CoopCredMinas deseja saber: “Considerando todos os trimestres de 2025, qual foi o volume total de crédito concedido e a taxa média de inadimplência em cada cidade?“
+
+Utilizando o operador |>, crie um pipeline que gere os resultados solicitados pela diretoria, ou seja, que:
+
+- Agrupe os dados de dados_analise por cidade.
+- Calcule o volume_total: soma do volume_credito.
+- Calcule a media_inadimplencia: média da taxa_inadimplencia.
+- Ordene os resultados do maior para o menor volume_total.
+
+# Questão 2
+
+A CoopCredMinas oferece linhas de crédito para capital de giro de pequenas empresas cooperadas. A equipe de análise de crédito precisa desenvolver uma ferramenta em R para calcular rapidamente a prestação mensal para diferentes cenários de taxa de juros, auxiliando os cooperados na tomada de decisão sobre financiamentos.
+
+a) (4 pontos)
+
+Crie uma função chamada calcular_prestacao() que calcula a prestação mensal de um financiamento pelo Sistema Price (Tabela Price).
+
+A função deve receber três argumentos:
+
+valor: valor do financiamento (em R$)
+
+taxa_anual: taxa de juros anual (em formato decimal, ex: 0.12 para 12% a.a.)
+
+num_meses: número de parcelas mensais
+
+A fórmula da prestação mensal é:
+ 
+onde 
+ é a taxa de juros mensal e 
+.
+
+Após criar a função, teste-a calculando a prestação de um financiamento de R$ 120.000,00 a uma taxa anual de 12% em 60 meses. O resultado esperado é aproximadamente R$ 2.669,33.
+
+```{r}
+
+```
+
+
+
