@@ -1,0 +1,71 @@
+---
+title: "Exercício 6 - Análise de Montante com Juros Compostos"
+author: "Felipe Fonseca"
+date: today
+format: html
+execute:
+  echo: true
+---
+
+## Objetivo da análise
+
+O objetivo deste relatório é calcular o montante final de uma aplicação
+financeira com juros compostos e capitalização mensal, avaliando diferentes
+cenários de taxas de juros anuais. Para isso, utiliza-se programação
+funcional em R com a função `map_dbl()`, permitindo automatizar o cálculo
+dos montantes para múltiplas taxas de investimento.
+
+---
+
+## Definição da função
+
+```{r}
+library(tidyverse)
+library(purrr)
+
+calcular_montante_mensal <- function(capital, taxa_anual, meses) {
+  
+  taxa_mensal <- taxa_anual / 12
+  
+  montante <- capital * (1 + taxa_mensal)^meses
+  
+  return(montante)
+}
+```
+
+## Aplicação da função
+
+```{r}
+
+capital <- 20000
+meses <- 60
+
+taxas_anuais <- c(0.06, 0.08, 0.10, 0.12, 0.15)
+
+montantes <- map_dbl(
+  taxas_anuais,
+  ~ calcular_montante_mensal(capital, .x, meses)
+)
+
+montantes
+
+resultado <- tibble(
+  taxa = taxas_anuais,
+  montante = montantes,
+  ganho = montante - capital
+)
+
+resultado
+
+```
+
+## Conclusão
+
+Os resultados demonstram o impacto significativo da taxa de juros
+sobre o crescimento do capital ao longo do tempo. Mesmo pequenas
+variações nas taxas anuais produzem diferenças expressivas no
+montante final devido ao efeito dos juros compostos.
+
+A utilização da função map_dbl() permitiu automatizar a análise
+de cenários, tornando o processo mais eficiente e reprodutível,
+característica essencial em análises financeiras e de ciência de dados.
