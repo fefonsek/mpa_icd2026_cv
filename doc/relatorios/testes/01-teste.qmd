@@ -1,0 +1,70 @@
+---
+title: "Primeiro teste em Quarto"
+author: "Felipe Fonseca"
+format: 
+  html:
+    embed-resources: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## Objetivo
+
+Este é um arquivo Quarto de teste para a aula de Introdução à Ciência de Dados.
+
+Neste arquivo, estou aprendendo a combinar texto, listas e código em um mesmo documento.
+
+## Alguns pontos importantes
+
+- O Quarto permite escrever texto e código no mesmo arquivo.
+- O resultado pode ser renderizado em diferentes formatos.
+- Nesta aula, estamos começando com a saída em HTML.
+
+## Etapas realizadas
+
+1. Criar um arquivo `.qmd`.
+2. Salvar o arquivo na pasta correta.
+3. Renderizar o documento em HTML.
+
+## 
+
+```{r}
+library(tidyverse)
+
+# cria uma tibble simples
+df <- tibble(
+  dia = c("Seg", "Ter", "Qua", "Qui", "Sex"),
+  retorno = c(0.012, 0.018, -0.005, 0.021, 0.009)
+)
+
+# pipeline simples de análise descritiva
+df |> 
+  select(-dia) |> 
+  summarize(retorno_medio = mean(retorno),
+            volatilidade = sd(retorno),
+            retorno_max = max(retorno),
+            retorno_min = min(retorno),
+  )
+```
+
+## Um gráfico simples
+
+```{r}
+#| echo: false
+
+#| label: fig-retornos
+#| fig-cap: "Gráfico de barras com retornos diários simulados."
+
+# cria um gráfico de barras simples
+ggplot(df, aes(x = dia, y = retorno)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    x = "Dia da semana",
+    y = "Retorno diário"
+  ) +
+  theme_minimal()
+```
+
+A média de um vetor que contém os inteiros entre 1 e 10 é `r mean(1:10)`
