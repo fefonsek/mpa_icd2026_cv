@@ -41,3 +41,44 @@ tibble(
   `P(ambas caem)` = p_xy,
   `P(X cai) * P(Y cai)` = p_x * p_y
 )
+
+# fixa a semente para reprodutibilidade
+set.seed(789)
+
+# número de clientes simulados
+n_clientes <- 100000
+
+# primeiro simulamos se cada cliente é inadimplente ou não
+clientes_simulados <- tibble(
+  inadimplente = sample(
+    c(TRUE, FALSE),
+    size = n_clientes,
+    replace = TRUE,
+    prob = c(0.10, 0.90)
+  ),
+
+  # case_when() aplica uma regra para cada condição lógica
+  alto_risco = case_when(
+    inadimplente ~ sample(
+      c(TRUE, FALSE),
+      size = n_clientes,
+      replace = TRUE,
+      prob = c(0.90, 0.10)
+    ),
+    # !inadimplente significa "não inadimplente"
+    !inadimplente ~ sample(
+      c(TRUE, FALSE),
+      size = n_clientes,
+      replace = TRUE,
+      prob = c(0.20, 0.80)
+    )
+  )
+)
+
+# summarise() resume as principais proporções simuladas
+clientes_simulados |>
+  summarise(
+    prop_inadimplente = mean(inadimplente),
+    prop_alto_risco = mean(alto_risco),
+    prop_inadimplente_dado_alto_risco = mean(inadimplente[alto_risco])
+  )
