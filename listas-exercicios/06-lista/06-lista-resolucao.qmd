@@ -1,0 +1,51 @@
+---
+title: "Lista de Exercícios 6"
+author: "Felipe Fonseca"
+format: 
+  html:
+    embed-resources: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Exercício 1
+
+## 1
+
+```{r}
+set.seed(20260507)
+
+retornos -> c(0.06, 0.02, -0.01, -0.04)
+
+
+```
+
+## 2
+
+```{r}
+
+
+probabilidades <- c(0.25, 0.35, 0.25, 0.15)
+
+retornos_possiveis
+sum(probabilidades)
+
+```
+
+## 3
+
+```{r}
+
+sample()
+
+```
+
+## 4
+
+```{r}
+
+
+
+```
