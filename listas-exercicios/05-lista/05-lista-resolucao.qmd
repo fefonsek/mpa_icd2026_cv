@@ -4,6 +4,8 @@ author: "Felipe Fonseca"
 format: 
   html:
     embed-resources: true
+    toc: true
+    toc-location: right
 execute:
   echo: true
   warning: false
@@ -63,9 +65,17 @@ intersect(H, A)
 Conclusão
 
 F e H são mutuamente exclusivos, pois:<br>
-F∩H=∅<br>
-F e A não são mutuamente exclusivos, pois F está contido em A.<br>
-H e A não são mutuamente exclusivos, pois H está contido em A.<br>
+$$
+F∩H=∅
+$$
+F e A não são mutuamente exclusivos, pois:<br>
+$$
+F \subseteq A
+$$
+H e A não são mutuamente exclusivos, pois:<br>
+$$
+H \subseteq A
+$$
 
 # Exercício 2
 
@@ -80,9 +90,17 @@ B: ação Y cai mais de 2% no dia<br>
 
 Probabilidades fornecidas:<br>
 
-P(A)=0.10,P(B)=0.08,P(A∩B)=0.04<br>
+$$
+P(A)=0.10
+$$
+$$
+P(B)=0.08
+$$
+$$
+P(A∩B)=0.04
+$$
 
-# 1
+## 1
 
 Definimos:
 
@@ -122,7 +140,9 @@ Probabilidade de superar o benchmark por 10 anos consecutivos<br>
 
 Como os eventos são independentes:<br>
 
-P(10 anos seguidos)=(0.5)^10
+$$
+P(\text{10 anos consecutivos}) = (0.5)^{10}
+$$
 
 ```{r}
 
@@ -175,7 +195,7 @@ Assim:<br>
 
 Esse raciocínio é um exemplo clássico do problema de seleção por sorte em avaliação de performance financeira.<br>
 
-## Exercício 4
+# Exercício 4
 
 Definições<br>
 
@@ -217,16 +237,16 @@ Resultado: A probabilidade de um cliente ser inadimplente dado que houve atraso 
 
 # Exercício 5
 
-Lei da Probabilidade Total
+Lei da Probabilidade Total<br>
 
-Sejam:
+Sejam:<br>
 
-B: baixo risco
-M: médio risco
-A: alto risco
-I: evento inadimplência
+B: baixo risco<br>
+M: médio risco<br>
+A: alto risco<br>
+I: evento inadimplência<br>
 
-Pela Lei da Probabilidade Total:
+Pela Lei da Probabilidade Total:<br>
 
 $$
 P(I) = P(I \mid B)P(B) + P(I \mid M)P(M) + P(I \mid A)P(A)
@@ -252,11 +272,11 @@ P_total_inad <-
 P_total_inad
 ```
 
-Resultado<br>
+*Resultado*<br>
 
 A taxa total de inadimplência da carteira é: `r scales::percent(P_total_inad)`<br>
 
-Interpretação<br>
+*Interpretação*<br>
 
 A inadimplência total da carteira não depende apenas das taxas individuais de risco, mas também da composição da carteira.<br>
 
@@ -265,11 +285,331 @@ Isso mostra que:<br>
 - mesmo uma pequena parcela de clientes de alto risco pode elevar significativamente o risco agregado;<br>
 - a gestão de portfólio envolve equilibrar probabilidade de inadimplência e participação de cada segmento.<br>
 
-Resumo
+*Resumo*
 
 $$
 P(I)=∑P(I∣perfil)P(perfil)
 $$
 
-Taxa total estimada: `r scales::percent(P_total_inad)`
+Taxa total estimada: `r scales::percent(P_total_inad, accuracy = 0.1)`
 
+# Exercício 6
+
+Teorema de Bayes
+
+*Definições*
+
+Sejam os eventos:
+
+D = empresa entra em dificuldade financeira
+D
+ˉ
+ = empresa saudável
+R = empresa classificada como risco elevado
+
+Dados:
+
+$$
+P(D)=0,08
+$$
+
+$$
+P(R∣D)=0,85
+$$
+
+$$
+P(R∣\bar{D})=0,25
+$$
+
+Logo:
+
+$$
+P(\bar{D})=1−P(D)=1−0,08=0,92
+$$
+
+
+## 1
+
+Probabilidade total de risco elevado
+
+Usamos a Lei da Probabilidade Total:
+
+$$
+P(R)=P(R∣D)⋅P(D)+P(R∣\bar{D})⋅P(\bar{D})
+$$
+
+Substituindo:
+
+$$
+P(R)=0,85×0,08+0,25×0,92
+$$
+
+$$
+P(R)=0,068+0,23
+$$
+
+$$
+P(R)=0,298
+$$
+	
+
+```{r}
+# Probabilidades dadas
+P_D  <- 0.08   # P(D)  -> empresa entra em dificuldade
+P_R_D <- 0.85  # P(R|D) -> classificada como risco elevado dado dificuldade
+P_R_Dc <- 0.25 # P(R|D̄) -> classificada como risco elevado sendo saudável
+
+# Complemento
+P_Dc <- 1 - P_D  # P(D̄)
+
+# Lei da Probabilidade Total
+P_R <- P_R_D * P_D + P_R_Dc * P_Dc
+
+# Resultado
+P_R
+```
+
+Resultado: A probabilidade de uma empresa ser classificada como risco elevado é `r scales::percent(P_R, accuracy = 0.1)`.
+
+## 2
+
+Probabilidade de dificuldade financeira dado risco elevado
+
+Queremos:
+
+$$
+P(D∣R)
+$$
+
+Aplicando o Teorema de Bayes:
+
+$$
+P(D∣R)=\frac{P(R∣D)⋅P(D)}{P(R)}
+$$
+
+
+Substituindo:
+
+$$
+P(D∣R)=
+\frac{0,85×0,08}{0,298}
+$$
+
+$$
+P(D∣R)=
+\frac{0,068}{0,298}
+$$
+
+$$
+P(D∣R)≈0,228
+$$
+​
+
+```{r}
+# Probabilidades conhecidas
+P_D   <- 0.08   # P(D)  -> dificuldade financeira
+P_R_D <- 0.85   # P(R|D)
+P_R_Dc <- 0.25  # P(R|D̄)
+
+# Probabilidade total de risco elevado (já calculada antes)
+P_R <- P_R_D * P_D + P_R_Dc * (1 - P_D)
+
+# Teorema de Bayes
+P_D_R <- (P_R_D * P_D) / P_R
+
+# Resultado
+P_D_R
+```
+
+Resultado: A probabilidade de uma empresa estar em dificuldade financeira dado que foi classificada como risco elevado é aproximadamente `r scales::percent(P_D_R, accuracy = 0.1)`.
+
+# Exercício 7
+
+Simulação de lançamentos de moeda
+
+```{r}
+
+# Reprodutibilidade
+set.seed(2026)
+
+# Função para simular lançamentos
+simular_moeda <- function(n) {
+  
+  lancamentos <- sample(
+    c("cara", "coroa"),
+    size = n,
+    replace = TRUE,
+    prob = c(0.5, 0.5)
+  )
+  
+  freq_cara <- mean(lancamentos == "cara")
+  
+  return(freq_cara)
+}
+
+# Tamanhos solicitados
+n1 <- 1000
+n2 <- 10000
+n3 <- 100000
+
+# Simulações
+freq1 <- simular_moeda(n1)
+freq2 <- simular_moeda(n2)
+freq3 <- simular_moeda(n3)
+
+# Resultados
+freq1
+freq2
+freq3
+
+```
+
+Comparação com a probabilidade teórica
+
+```{r}
+
+P_teorica <- 0.5
+
+resultado <- data.frame(
+  Lancamentos = c(n1, n2, n3),
+  Frequencia_Simulada = c(freq1, freq2, freq3),
+  Probabilidade_Teorica = P_teorica,
+  Erro = c(freq1, freq2, freq3) - P_teorica
+)
+
+resultado
+
+```
+
+Impressão interpretativa no relatório
+
+```{r}
+
+cat(
+  "Frequências relativas observadas:\n",
+  "1.000 lançamentos:", round(freq1, 4), "\n",
+  "10.000 lançamentos:", round(freq2, 4), "\n",
+  "100.000 lançamentos:", round(freq3, 4), "\n"
+)
+
+```
+
+À medida que o número de lançamentos aumenta, a frequência relativa de caras aproxima-se da probabilidade teórica P(cara)=0.5.
+
+Esse comportamento ilustra a Lei dos Grandes Números, segundo a qual a média amostral converge para o valor esperado quando o tamanho da amostra cresce.
+
+# Exercício 8
+
+## 1 Definir parâmetros do modelo
+
+```{r}
+
+# Reprodutibilidade
+set.seed(2026)
+
+# Número de empresas
+n <- 100000
+
+# Probabilidades do modelo
+P_D  <- 0.08   # dificuldade financeira
+P_R_D <- 0.85  # risco elevado dado dificuldade
+P_R_S <- 0.25  # risco elevado dado saudável
+
+```
+
+## 2 Simular dificuldade financeira
+
+```{r}
+
+# 1 = dificuldade financeira
+# 0 = saudável
+
+dificuldade <- rbinom(
+  n = n,
+  size = 1,
+  prob = P_D
+)
+
+```
+
+Aqui cada empresa é sorteada como:<br>
+- 1 → entrou em dificuldade<br>
+- 0 → saudável<br>
+
+## 3 Simular classificação de risco elevado
+
+A probabilidade depende da situação real da empresa.
+
+```{r}
+
+risco_elevado <- ifelse(
+  dificuldade == 1,
+  
+  # Empresas em dificuldade
+  rbinom(n, 1, P_R_D),
+  
+  # Empresas saudáveis
+  rbinom(n, 1, P_R_S)
+)
+
+```
+
+## 4 Estimativas simuladas
+
+```{r}
+
+# Probabilidade total de risco elevado
+P_R_sim <- mean(risco_elevado)
+
+# Probabilidade de dificuldade dado risco elevado
+P_D_R_sim <- mean(dificuldade[risco_elevado == 1])
+
+P_R_sim
+P_D_R_sim
+
+```
+
+## 5 Valores teóricos (Exercício 6)
+
+```{r}
+
+# Probabilidade total (Lei da Probabilidade Total)
+P_R_teorico <- P_R_D * P_D +
+               P_R_S * (1 - P_D)
+
+# Bayes
+P_D_R_teorico <- (P_R_D * P_D) / P_R_teorico
+
+P_R_teorico
+P_D_R_teorico
+
+```
+
+## 6 Comparação final
+
+```{r}
+
+resultado <- data.frame(
+  Medida = c(
+    "P(R) - Total risco elevado",
+    "P(D|R) - Dificuldade dado risco"
+  ),
+  
+  Teorico = c(
+    P_R_teorico,
+    P_D_R_teorico
+  ),
+  
+  Simulado = c(
+    P_R_sim,
+    P_D_R_sim
+  )
+)
+
+resultado
+
+```
+
+A simulação de 100.000 empresas reproduz os resultados teóricos obtidos pela Lei da Probabilidade Total e pelo Teorema de Bayes.
+
+À medida que o tamanho da amostra aumenta, as estimativas simuladas convergem para os valores teóricos, evidenciando o funcionamento da Lei dos Grandes Números e mostrando como o Teorema de Bayes pode ser interpretado como uma atualização probabilística baseada em evidência observada.
