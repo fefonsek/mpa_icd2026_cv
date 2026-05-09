@@ -4,6 +4,8 @@ author: "Felipe Fonseca"
 format: 
   html:
     embed-resources: true
+    toc: true
+    toc-location: right
 execute:
   echo: true
   warning: false
@@ -12,40 +14,149 @@ execute:
 
 # Exercício 1
 
-## 1
+Uma aplicação financeira pode gerar diferentes retornos líquidos mensais.
+Vamos simular 10.000 meses independentes e estimar suas propriedades estatísticas.
 
 ```{r}
+
+## 1
+
+# Reprodutibilidade
 set.seed(20260507)
 
-retornos -> c(0.06, 0.02, -0.01, -0.04)
+# Retornos possíveis (em decimal)
+retornos_possiveis <- c(0.06, 0.02, -0.01, -0.04)
 
-
-```
+# Probabilidades associadas
+probabilidades <- c(0.25, 0.35, 0.25, 0.15)
 
 ## 2
 
-```{r}
+# Simulação de 10.000 meses
+retornos <- sample(
+  retornos_possiveis,
+  size = 10000,
+  replace = TRUE,
+  prob = probabilidades
+)
 
-
-probabilidades <- c(0.25, 0.35, 0.25, 0.15)
-
-retornos_possiveis
-sum(probabilidades)
-
-```
 
 ## 3
 
-```{r}
+valor_esperado <- mean(retornos)
+variancia <- var(retornos)
+desvio_padrao <- sd(retornos)
+prob_retorno_negativo <- mean(retornos < 0)
 
-sample()
+cat(
+  "Retornos possíveis:", paste(retornos_possiveis, collapse = ", "), "\n",
+  "Probabilidades associadas:", paste(probabilidades, collapse = ", "), "\n",
+  "Valor esperado do retorno mensal:", round(valor_esperado*100,2), "%\n",
+  "Variância:", round(variancia,5), "\n",
+  "Desvio-padrão:", round(desvio_padrao*100,2), "%\n",
+  "Probabilidade de retorno negativo:", 
+  round(prob_retorno_negativo*100,2), "%\n"
+)
+
+hist(
+  retornos,
+  main = "Distribuição Simulada dos Retornos Mensais",
+  xlab = "Retorno",
+  breaks = 30
+)
 
 ```
 
-## 4
+## Interpretação
+
+A simulação aproxima as características da distribuição verdadeira dos retornos.<br>
+De acordo com a Lei dos Grandes Números, à medida que o número de meses simulados aumenta, as estimativas convergem para os valores populacionais do processo gerador dos retornos.
+
+# Exercício 2
+
+Uma operação de crédito pode gerar três resultados possíveis ao final do período:
+
+- pagamento em dia → lucro de R$ 900;
+- atraso com renegociação → lucro de R$ 150;
+- inadimplência → prejuízo de R$ 3.500.
+
+Vamos simular operações individuais e carteiras de crédito.
 
 ```{r}
 
+set.seed(20260508)
 
+# Lucros possíveis
+lucros_possiveis <- c(900, 150, -3500)
+
+# Probabilidades (ajuste conforme enunciado da lista)
+probabilidades <- c(0.75, 0.20, 0.05)
+
+lucros <- sample(
+  lucros_possiveis,
+  size = 20000,
+  replace = TRUE,
+  prob = probabilidades
+)
+
+valor_esperado <- mean(lucros)
+desvio_padrao <- sd(lucros)
+prob_prejuizo <- mean(lucros < 0)
+
+cat(
+  "Lucro médio por operação: R$", round(valor_esperado,2), "\n",
+  "Desvio-padrão do lucro: R$", round(desvio_padrao,2), "\n",
+  "Probabilidade de prejuízo:", round(prob_prejuizo*100,2), "%\n"
+)
 
 ```
+
+Cada carteira possui 80 operações independentes.<br>
+O valor esperado do lucro total por carteira deve ser aproximadamente:
+$$
+80 \times E(\text{lucro por operação})
+$$
+
+```{r}
+
+lucro_carteiras <- replicate(
+  5000,
+  sum(
+    sample(
+      lucros_possiveis,
+      size = 80,
+      replace = TRUE,
+      prob = probabilidades
+    )
+  )
+)
+
+lucro_medio_carteira <- mean(lucro_carteiras)
+desvio_carteira <- sd(lucro_carteiras)
+
+comparacao_teorica <- 80 * valor_esperado
+
+cat(
+  "Lucro médio por carteira (simulado): R$", round(lucro_medio_carteira,2), "\n",
+  "Desvio-padrão do lucro por carteira (simulado): R$", round(desvio_carteira,2), "\n",
+  "Lucro médio por carteira (teórico): R$", round(comparacao_teorica,2), "\n"
+)
+
+```
+
+## Interpretação
+
+O lucro médio total por carteira é aproximadamente igual a 80 vezes o lucro médio por operação individual, como previsto pela linearidade da esperança matemática:<br>
+
+$$
+E(S_{80})=80⋅E(X)
+$$
+Além disso, observa-se que o desvio-padrão cresce com o tamanho da carteira, mas o risco relativo diminui, ilustrando o efeito de diversificação e a Lei dos Grandes Números.<br><br>
+
+Esperança de soma de variáveis independentes<br>
+Propriedade: 
+$$ 
+E(∑Xi)=∑E(Xi)
+$$
+Diversificação reduz risco relativo<br>
+Fundamento matemático da securitização e carteiras de crédito<br>
