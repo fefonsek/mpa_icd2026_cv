@@ -174,3 +174,49 @@ Assim:<br>
 - longas sequências de sucesso não são, por si só, evidência definitiva de habilidade.<br>
 
 Esse raciocínio é um exemplo clássico do problema de seleção por sorte em avaliação de performance financeira.<br>
+
+## Exercício 4
+
+Definições<br>
+
+Considere uma carteira de crédito com:<br>
+
+- P(A)=0.15 → cliente atrasou alguma parcela;<br>
+- P(I)=0.09 → cliente ficou inadimplente;<br>
+- P(A∩I)=0.06 → cliente atrasou e ficou inadimplente.<br>
+
+## 1
+
+Probabilidade condicional
+
+Queremos calcular:
+
+$$
+P(I \mid A)
+$$
+
+Pela definição de probabilidade condicional:
+
+$$
+P(I \mid A) = \frac{P(A \cap I)}{P(A)}
+$$
+
+```{r}
+
+# Probabilidades fornecidas
+P_atraso <- 0.15
+P_inadimplente <- 0.09
+P_ambos <- 0.06
+
+# Probabilidade condicional
+P_inad_dado_atraso <- P_ambos / P_atraso
+
+P_inad_dado_atraso
+
+```
+
+Resultado: A probabilidade de um cliente ser inadimplente dado que houve atraso é:`r scales::percent(P_inad_dado_atraso)`.
+
+## 2
+
+A probabilidade incondicional de inadimplência é: `r scales::percent(P_inadimplente)`.<br>
