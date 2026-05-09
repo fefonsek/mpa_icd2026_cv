@@ -1,0 +1,113 @@
+---
+title: "Lista de Exercícios 6"
+author: "Felipe Fonseca"
+format: 
+  html:
+    embed-resources: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Exercício 1
+
+Definição do experimento.
+O experimento aleatório consiste em observar, em determinado ano, se uma empresa-alvo:
+- não é adquirida;
+- é adquirida de forma amigável;
+- é adquirida de forma hostil.
+
+## 1
+
+```{r}
+
+# Espaço amostral
+S <- c("n", "f", "h")
+S
+
+```
+
+Interpretação
+
+n → não adquirida
+f → aquisição amigável
+h → aquisição hostil
+
+## 2
+
+```{r}
+
+# Eventos
+
+A <- c("f", "h")  # ocorre aquisição
+F <- c("f")       # aquisição amigável
+H <- c("h")       # aquisição hostil
+
+A
+F
+H
+
+```
+
+## 3
+
+```{r}
+
+intersect(F, H)
+intersect(F, A)
+intersect(H, A)
+
+```
+
+Conclusão
+
+F e H são mutuamente exclusivos, pois:
+F∩H=∅
+F e A não são mutuamente exclusivos, pois F está contido em A.
+H e A não são mutuamente exclusivos, pois H está contido em A.
+
+# Exercício 2
+
+Definições do problema
+
+Uma carteira possui probabilidade de 18% de apresentar retorno negativo no mês.
+
+Definimos os eventos:
+
+A: ação X cai mais de 2% no dia
+B: ação Y cai mais de 2% no dia
+
+Probabilidades fornecidas:
+
+P(A)=0.10,P(B)=0.08,P(A∩B)=0.04
+
+# 1
+
+Definimos:
+
+R: carteira apresenta retorno negativo no mês
+
+```{r}
+
+# Probabilidade de retorno negativo
+P_R <- 0.18
+
+# Complemento
+P_R_comp <- 1 - P_R
+
+P_R_comp
+
+```
+
+Interpretação: A probabilidade de a carteira não apresentar retorno negativo (ou seja, ter retorno não negativo) no mês é ```{r}P_R_comp*100```%.
+
+## 2
+
+P_A <- 0.10
+P_B <- 0.08
+P_intersec <- 0.04
+
+P_uniao <- P_A + P_B - P_intersec
+
+P_uniao
