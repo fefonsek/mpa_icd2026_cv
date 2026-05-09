@@ -1,5 +1,5 @@
 ---
-title: "Lista de Exercícios 6"
+title: "Lista de Exercícios 5"
 author: "Felipe Fonseca"
 format: 
   html:
@@ -12,11 +12,11 @@ execute:
 
 # Exercício 1
 
-Definição do experimento.
-O experimento aleatório consiste em observar, em determinado ano, se uma empresa-alvo:
-- não é adquirida;
-- é adquirida de forma amigável;
-- é adquirida de forma hostil.
+Definição do experimento.<br>
+O experimento aleatório consiste em observar, em determinado ano, se uma empresa-alvo:<br>
+- não é adquirida;<br>
+- é adquirida de forma amigável;<br>
+- é adquirida de forma hostil.<br>
 
 ## 1
 
@@ -30,9 +30,9 @@ S
 
 Interpretação
 
-n → não adquirida
-f → aquisição amigável
-h → aquisição hostil
+n → não adquirida<br>
+f → aquisição amigável<br>
+h → aquisição hostil<br>
 
 ## 2
 
@@ -62,25 +62,25 @@ intersect(H, A)
 
 Conclusão
 
-F e H são mutuamente exclusivos, pois:
-F∩H=∅
-F e A não são mutuamente exclusivos, pois F está contido em A.
-H e A não são mutuamente exclusivos, pois H está contido em A.
+F e H são mutuamente exclusivos, pois:<br>
+F∩H=∅<br>
+F e A não são mutuamente exclusivos, pois F está contido em A.<br>
+H e A não são mutuamente exclusivos, pois H está contido em A.<br>
 
 # Exercício 2
 
-Definições do problema
+Definições do problema<br>
 
-Uma carteira possui probabilidade de 18% de apresentar retorno negativo no mês.
+Uma carteira possui probabilidade de 18% de apresentar retorno negativo no mês.<br>
 
-Definimos os eventos:
+Definimos os eventos:<br>
 
-A: ação X cai mais de 2% no dia
-B: ação Y cai mais de 2% no dia
+A: ação X cai mais de 2% no dia<br>
+B: ação Y cai mais de 2% no dia<br>
 
-Probabilidades fornecidas:
+Probabilidades fornecidas:<br>
 
-P(A)=0.10,P(B)=0.08,P(A∩B)=0.04
+P(A)=0.10,P(B)=0.08,P(A∩B)=0.04<br>
 
 # 1
 
@@ -100,10 +100,11 @@ P_R_comp
 
 ```
 
-Interpretação: A probabilidade de a carteira não apresentar retorno negativo (ou seja, ter retorno não negativo) no mês é ```{r}P_R_comp*100```%.
+Interpretação: A probabilidade de a carteira não apresentar retorno negativo (ou seja, ter retorno não negativo) no mês é `r scales::percent(P_R_comp, accuracy = 0.1)`.
 
 ## 2
 
+```{r}
 P_A <- 0.10
 P_B <- 0.08
 P_intersec <- 0.04
@@ -111,3 +112,65 @@ P_intersec <- 0.04
 P_uniao <- P_A + P_B - P_intersec
 
 P_uniao
+```
+
+# Exercício 3
+
+## 1
+
+Probabilidade de superar o benchmark por 10 anos consecutivos<br>
+
+Como os eventos são independentes:<br>
+
+P(10 anos seguidos)=(0.5)^10
+
+```{r}
+
+# Probabilidade anual
+p <- 0.5
+
+# Número de anos consecutivos
+n_anos <- 10
+
+# Probabilidade de sucesso consecutivo
+prob_10_anos <- p^n_anos
+
+prob_10_anos
+
+```
+
+## 2
+
+Quantos gestores esperaríamos observar por acaso?<br>
+
+Suponha um universo com 2.000 gestores.<br>
+
+O número esperado é:<br>
+
+```{r}
+
+# Número de gestores
+N <- 2000
+
+# Valor esperado
+gestores_esperados <- N * prob_10_anos
+
+gestores_esperados
+
+```
+
+Resultado: Esperamos observar aproximadamente `r round(gestores_esperados, 2)` gestores superando o benchmark por 10 anos consecutivos apenas por acaso.
+
+## 3
+
+Interpretação para rankings de desempenho<br>
+
+Mesmo que nenhum gestor possua habilidade superior, sequências longas de sucesso podem surgir naturalmente devido ao acaso.<br>
+
+Assim:<br>
+
+- rankings de desempenho podem destacar gestores aparentemente excepcionais;<br>
+- porém parte desses resultados pode ser explicada por variabilidade aleatória;<br>
+- longas sequências de sucesso não são, por si só, evidência definitiva de habilidade.<br>
+
+Esse raciocínio é um exemplo clássico do problema de seleção por sorte em avaliação de performance financeira.<br>
