@@ -185,8 +185,6 @@ Considere uma carteira de crédito com:<br>
 - P(I)=0.09 → cliente ficou inadimplente;<br>
 - P(A∩I)=0.06 → cliente atrasou e ficou inadimplente.<br>
 
-## 1
-
 Probabilidade condicional
 
 Queremos calcular:
@@ -217,6 +215,61 @@ P_inad_dado_atraso
 
 Resultado: A probabilidade de um cliente ser inadimplente dado que houve atraso é:`r scales::percent(P_inad_dado_atraso)`.
 
-## 2
+# Exercício 5
 
-A probabilidade incondicional de inadimplência é: `r scales::percent(P_inadimplente)`.<br>
+Lei da Probabilidade Total
+
+Sejam:
+
+B: baixo risco
+M: médio risco
+A: alto risco
+I: evento inadimplência
+
+Pela Lei da Probabilidade Total:
+
+$$
+P(I) = P(I \mid B)P(B) + P(I \mid M)P(M) + P(I \mid A)P(A)
+$$
+
+```{r}
+# Proporções dos perfis
+P_B <- 0.50
+P_M <- 0.35
+P_A <- 0.15
+
+# Taxas de inadimplência condicionais
+P_I_B <- 0.03
+P_I_M <- 0.08
+P_I_A <- 0.22
+
+# Probabilidade total de inadimplência
+P_total_inad <- 
+  P_I_B * P_B +
+  P_I_M * P_M +
+  P_I_A * P_A
+
+P_total_inad
+```
+
+Resultado<br>
+
+A taxa total de inadimplência da carteira é: `r scales::percent(P_total_inad)`<br>
+
+Interpretação<br>
+
+A inadimplência total da carteira não depende apenas das taxas individuais de risco, mas também da composição da carteira.<br>
+
+Isso mostra que:<br>
+
+- mesmo uma pequena parcela de clientes de alto risco pode elevar significativamente o risco agregado;<br>
+- a gestão de portfólio envolve equilibrar probabilidade de inadimplência e participação de cada segmento.<br>
+
+Resumo
+
+$$
+P(I)=∑P(I∣perfil)P(perfil)
+$$
+
+Taxa total estimada: `r scales::percent(P_total_inad)`
+
