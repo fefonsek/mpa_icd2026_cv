@@ -1,0 +1,91 @@
+---
+title: "Lista de Exercícios 6"
+author: "Felipe Fonseca"
+format: 
+  html:
+    embed-resources: true
+    toc: true
+    toc-location: right
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Exercício 1
+
+```{r}
+
+library(tidyverse)
+
+lcg <- function(n, seed, a, c, m) {
+  # Crie vetores vazios para guardar os valores gerados.
+  x <- numeric(n)
+  u <- numeric(n)
+
+  # No início, o valor anterior é a semente X_0.
+  x_anterior <- seed
+
+  for (i in 1:n) {
+    # 1. Calcule a expressão a * X_{n-1} + c.
+    valor_bruto <- a * x_anterior + c
+
+    # 2. Guarde em x[i] o resto da divisão por m.
+    x[i] <- valor_bruto %% m
+
+    # 3. Divida x[i] por m para obter u[i], um valor em [0, 1).
+    u[i] <- x[i] / m
+
+    # 4. O valor guardado em x[i] será usado na próxima repetição.
+    x_anterior <- x[i]
+  }
+
+  # Organize a sequência gerada em uma tabela.
+  resultado <- tibble(
+    iteracao = 1:n,
+    x = x,
+    u = u
+  )
+
+  return(resultado)
+}
+
+# Teste sua função com os parâmetros do cálculo manual.
+teste_lcg0 <- lcg(n = 20, seed = 1, a = 5, c = 3, m = 8)
+view(teste_lcg0)
+
+teste_lcg1 <- lcg(n = 100, seed = 10, a = 11, c = 4, m = 23)
+view(teste_lcg1)
+
+```
+
+# Exercício 2
+
+```{r}
+
+set.seed(20260514)
+
+f <- function(x) {
+  sin(x * (1 - x)) / (1 + x + sqrt(x))
+}
+
+N <- 100000
+u <- runif(N, min = 0, max = 1)
+
+estimativa_mc <- mean(f(u))
+estimativa_mc
+
+N = 1000
+u <- runif(N, min = 0, max = 1)
+
+aprox_monte_carlo<- (1-0)*mean(f(u))
+aprox_monte_carlo
+
+integral <- integrate(f,0,1)
+integral
+
+integral - aprox_monte_carlo
+
+
+
+```
