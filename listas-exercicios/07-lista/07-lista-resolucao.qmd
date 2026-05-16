@@ -63,29 +63,39 @@ view(teste_lcg1)
 
 ```{r}
 
+# 1. Definir semente
 set.seed(20260514)
 
+# 2. Definir função
 f <- function(x) {
   sin(x * (1 - x)) / (1 + x + sqrt(x))
 }
 
-N <- 100000
-u <- runif(N, min = 0, max = 1)
+# 3. Gerar valores uniformes
+N <- 1000
+a <- 0
+b <- 1
 
-estimativa_mc <- mean(f(u))
-estimativa_mc
+u <- runif(N, min = a, max = b)
 
-N = 1000
-u <- runif(N, min = 0, max = 1)
-
-aprox_monte_carlo<- (1-0)*mean(f(u))
+# 4. Estimativa Monte Carlo
+aprox_monte_carlo <- (b - a) * mean(f(u))
 aprox_monte_carlo
 
-integral <- integrate(f,0,1)
-integral
+# 5. Aproximação numérica de referência
+integral <- integrate(f, a, b)
+valor_integral <- integral$value
+valor_integral
 
-integral - aprox_monte_carlo
+# 6. Erro absoluto
+erro_absoluto <- abs(aprox_monte_carlo - valor_integral)
+erro_absoluto
 
-
+# 7. Comentário
+cat(
+  "A estimativa de Monte Carlo é próxima do valor obtido por integrate().
+Diferenças ocorrem devido à variabilidade amostral do método Monte Carlo.
+Com aumento de N, espera-se redução do erro."
+)
 
 ```
