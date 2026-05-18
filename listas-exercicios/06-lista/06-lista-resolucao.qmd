@@ -160,3 +160,101 @@ E(∑Xi)=∑E(Xi)
 $$
 Diversificação reduz risco relativo<br>
 Fundamento matemático da securitização e carteiras de crédito<br>
+
+# Exercício 3
+
+Em cada mês, a economia pode estar em dois estados:<br>
+- expansão → probabilidade 0,7;<br>
+- recessão → probabilidade 0,3.<br>
+
+O retorno da ação depende do estado econômico.<br>
+
+Vamos simular o processo em duas etapas:<br>
+- sortear o estado da economia;<br>
+- sortear o retorno condicionado ao estado.<br>
+
+```{r}
+
+library(dplyr)
+library(purrr)
+
+set.seed(20260509)
+
+# Número de meses simulados
+n <- 20000
+
+# 1️⃣ Sorteio do estado da economia
+estado <- sample(
+  c("expansao", "recessao"),
+  size = n,
+  replace = TRUE,
+  prob = c(0.7, 0.3)
+)
+
+dados <- tibble(estado = estado)
+
+# 2️⃣ Sorteio do retorno condicionado ao estado
+dados <- dados |>
+  mutate(
+    retorno = map_dbl(
+      estado,
+      ~ if (.x == "expansao") {
+        sample(
+          c(0.09, 0.04, -0.02),
+          size = 1,
+          prob = c(0.25, 0.5, 0.25)
+        )
+      } else {
+        sample(
+          c(0.03, -0.04, -0.11),
+          size = 1,
+          prob = c(0.15, 0.45, 0.40)
+        )
+      }
+    )
+  )
+
+# Estatísticas Estimadas:
+
+
+# Valor esperado incondicional
+valor_esperado_total <- mean(dados$retorno)
+
+# Valor esperado por estado
+media_expansao <- dados |>
+  filter(estado == "expansao") |>
+  summarise(media = mean(retorno)) |>
+  pull(media)
+
+media_recessao <- dados |>
+  filter(estado == "recessao") |>
+  summarise(media = mean(retorno)) |>
+  pull(media)
+
+# Probabilidade de retorno negativo
+prob_negativo <- mean(dados$retorno < 0)
+
+cat(
+  "Valor esperado do retorno (incondicional):",
+  round(valor_esperado_total*100,2), "%\n",
+  "Retorno médio na expansão:",
+  round(media_expansao*100,2), "%\n",
+  "Retorno médio na recessão:",
+  round(media_recessao*100,2), "%\n",
+  "Probabilidade de retorno negativo:",
+  round(prob_negativo*100,2), "%\n"
+)
+
+```
+
+## Interpretação
+
+O valor esperado incondicional do retorno é uma média ponderada dos retornos condicionais aos estados da economia:<br>
+
+$$
+E(R)=P(E)⋅E(R∣E)+P(Rc)⋅E(R∣Rc)
+$$
+
+onde:<br>
+- E representa expansão;<br>
+- Rc representa recessão.<br>
