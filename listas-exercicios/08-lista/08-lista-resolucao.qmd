@@ -1,5 +1,4 @@
 ---
-
 title: "Lista de Exercícios 8"
 author: "Felipe Fonseca"
 format: 
@@ -11,5 +10,132 @@ execute:
   echo: true
   warning: false
   message: false
-  
 ---
+
+## Exercício 1
+
+A distribuição Logística possui função de distribuição acumulada dada por:
+
+$$F(x) = \frac{1}{1 + e^{-(x-\mu)/\beta}}$$
+
+Gere 10.000 variáveis ​​aleatórias que seguem esta distribuição usando a transformação inversa.
+
+Função inversa da função de distribuição acumulada:
+
+$$F^{-1}(p) = \mu + \beta \cdot \log\left(\frac{p}{1-p}\right)$$
+
+```{r}
+
+# fixa a semente 
+set.seed(42)
+
+# simula U ~ Uniforme(0,1)
+u  <- runif(10000)
+
+# define os parâmetros da Logística
+mu <- 0
+beta <- 1
+
+# gera X ~ Logística(mu, beta)
+x <- mu + beta * log(u / (1 - u))
+
+```
+
+## Exercício 2
+
+O Índice de Liquidez Rápida (ILR) mede a capacidade de uma empresa pagar suas obrigações de curto prazo sem depender da venda de estoques:
+
+$$
+ILR=\frac{Ativo Circulante−Estoques}{Passivo Circulante}
+$$
+
+Cenário: Você é analista financeiro de uma empresa do setor de varejo e precisa avaliar o risco de liquidez sob incerteza.
+
+Informações dos especialistas (baseadas em dados setoriais):
+
+Ativo Circulante: entre R$ 800 mil e R$ 1.200 mil (mais provável: R$ 950 mil)
+Estoques: entre R$ 200 mil e R$ 400 mil (mais provável: R$ 280 mil)
+Passivo Circulante: entre R$ 600 mil e R$ 900 mil (mais provável: R$ 720 mil)
+Questões:
+
+Use set.seed(2024) e
+
+### 2.1
+
+Simule 20.000 cenários do ILR usando distribuições triangulares
+
+```{r}
+
+Use set.seed(2024)
+
+# Carrega os pacotes necessários
+library(tidyverse)
+library(triangulr)
+
+# Define a semente para tornar os resultados reprodutíveis
+set.seed(567)
+
+# Define o número de cenários simulados
+n_sim <- 20000
+
+# Simula os parâmetros incertos de cada cenário
+cenarios <- tibble(
+  cenario = seq_len(n_sim),
+  ativo_circulante = rtriangle(n_sim, min = 800000, max = 1200000, mode = 950000),
+  estoques = rtriangle(n_sim, min = 200000, max = 400000, mode = 280000),
+  passivo_circulante = rtriangle(n_sim, min = 600000, max = 900000, mode = 720000)
+)
+
+# Simula as ILR de cada cenário
+cenarios <- cenarios |>
+  mutate(
+    ilr = (ativo_circulante - estoques) / passivo_circulante
+  )
+
+# Visualiza os primeiros cenários simulados
+cenarios |>
+  slice_head(n = 5)
+
+```
+
+# Visualiza os primeiros cenários simulados
+cenarios |>
+  slice_head(n = 5)
+
+```
+
+### 2.2
+
+Calcule P(ILR<1) e interprete o resultado
+
+
+```{r}
+
+
+
+
+```
+
+### 2.3
+
+Compare o ILR médio simulado com o modelo determinístico (valores mais prováveis)
+
+
+```{r}
+
+
+
+
+```
+
+### 2.4
+
+Recomende ações se a probabilidade de ILR < 1 for maior que 40%
+
+
+```{r}
+
+
+
+
+```
