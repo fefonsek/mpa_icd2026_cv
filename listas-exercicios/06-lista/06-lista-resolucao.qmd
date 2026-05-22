@@ -216,7 +216,6 @@ dados <- dados |>
 
 # Estatísticas Estimadas:
 
-
 # Valor esperado incondicional
 valor_esperado_total <- mean(dados$retorno)
 
@@ -258,3 +257,6 @@ $$
 onde:<br>
 - E representa expansão;<br>
 - Rc representa recessão.<br>
+
+# Exercício 4
+

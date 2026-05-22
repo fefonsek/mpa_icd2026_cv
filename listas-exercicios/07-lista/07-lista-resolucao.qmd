@@ -91,11 +91,9 @@ valor_integral
 erro_absoluto <- abs(aprox_monte_carlo - valor_integral)
 erro_absoluto
 
-# 7. Comentário
-cat(
-  "A estimativa de Monte Carlo é próxima do valor obtido por integrate().
-Diferenças ocorrem devido à variabilidade amostral do método Monte Carlo.
-Com aumento de N, espera-se redução do erro."
-)
 
 ```
+
+A estimativa de Monte Carlo é próxima do valor obtido por integrate().<br>
+Diferenças ocorrem devido à variabilidade amostral do método Monte Carlo.<br>
+Com aumento de N, espera-se redução do erro.<br>
