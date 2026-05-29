@@ -155,29 +155,113 @@ Usando a linguagem R, faça o que se pede:
 
 Importe os preços diários das três ações a partir de 2024-01-01.
 
+```{r}
+
+# Importa as séries de preços das ações
+serie_precos <- c("PETR4.SA", "MGLU3.SA", "ITUB4.SA") %>% 
+  tq_get(from = "2024-01-01") %>%
+  select(symbol, date, close) %>%
+  pivot_wider(names_from = symbol, values_from = close) %>%
+  rename(dia = date,
+         petr4 = PETR4.SA,
+         mglu3 = MGLU3.SA,
+         itub4 = ITUB4.SA)
+
+```
+
 ### B
 
 Calcule os retornos logarítmicos diários de cada ação.
+
+```{r}
+
+# Calcula retornos logarítmicos
+retornos <- serie_precos %>%
+  mutate(
+    ret_petr4 = log(petr4 / lag(petr4)),
+    ret_mglu3 = log(mglu3 / lag(mglu3)),
+    ret_itub4 = log(itub4 / lag(itub4))
+  ) %>%
+  drop_na()
+
+```
 
 ### C
 
 Calcule o retorno diário da carteira usando a média ponderada dos retornos:
 
 $$
-rc,t = 0,40rPETR4,t + 0,30rMGLU3,t0,30rITUB4,t
+$$r_{c,t} = 0{,}40 \cdot r_{PETR4,t} + 0{,}30 \cdot r_{MGLU3,t} + 0{,}30 \cdot r_{ITUB4,t}$$
 $$
+
+```{r}
+
+# Define os pesos
+pesos <- c(0.4, 0.3, 0.3)  # exemplo: 40% PETR4, 30% MGLU3, 30% ITUB4
+
+# Calcula o retorno da carteira
+retornos <- retornos %>%
+  mutate(
+    ret_carteira = pesos[1] * ret_petr4 +
+                   pesos[2] * ret_mglu3 +
+                   pesos[3] * ret_itub4
+  )
+
+  # dimensão do retorno da carteira
+dim(retornos$ret_carteira)
+
+# exibie as primeiras linhas
+head(retornos$ret_carteira)
+
+```
 
 ### D
 
 Considere que o valor financeiro da carteira é de R$ 50.000,00 e que a probabilidade de excedência é p=1%.
 
+```{r}
+
+# Parâmetros
+p <- 0.01
+valor_carteira <- 50000
+
+```
+
 ### E
 
 Calcule o VaR histórico diário da carteira, em percentual e em reais.
 
+```{r}
+
+# Ordena retornos da carteira
+ret_ordenado <- sort(retornos$ret_carteira)
+
+# Índice do quantil
+k <- ceiling(length(ret_ordenado) * p)
+
+# VaR percentual e monetário
+var_percentual <- -ret_ordenado[k] * 100
+var_monetario <- -ret_ordenado[k] * valor_carteira
+
+var_percentual
+var_monetario
+
+```
+
 ### F
 
 Calcule o Expected Shortfall histórico diário da carteira, em percentual e em reais.
+
+```{r}
+
+# Expected Shortfall (ES)
+es_percentual <- -mean(ret_ordenado[1:k]) * 100
+es_monetario <- -mean(ret_ordenado[1:k]) * valor_carteira
+
+es_percentual
+es_monetario
+
+```
 
 ### G
 
