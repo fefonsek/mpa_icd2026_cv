@@ -26,6 +26,11 @@ Importe os preços diários da ação PETR4.SA a partir de 2024-01-01.
 
 ```{r}
 
+# Pacotes necessários
+library(tidyquant)   # coleta de dados financeiros via Yahoo Finance
+library(dplyr)       # manipulação de dados
+library(tidyr)       # manipulação de dados
+
 # calcular os retornos e remover valores ausentes
 precos_petrobras <- "PETR4.SA" |>
   tq_get(from = "2024-01-01") |>
@@ -69,11 +74,63 @@ Calcule o VaR histórico diário da carteira, em percentual e em reais.
 
 ```{r}
 
+n  <- 10000              # número de reamostragens
+
+# Simulação — bootstrap não-paramétrico
+
+# sample(..., replace = TRUE): sorteia retornos históricos com reposição
+# Nenhuma distribuição teórica é assumida: a distribuição vem dos próprios dados
+# set.seed() garante reprodutibilidade dos resultados
+set.seed(123)
+ret_sim <- sample(ret_petrobras, size = n, replace = TRUE)
+
+# Ordenação e localização do quantil inferior
+# sort() organiza do retorno mais negativo para o mais positivo
+ret_sim_ord <- sort(ret_sim)
+
+# ceiling(n * p): índice do quantil empírico de nível p
+# com n = 10.000 e p = 0,01, o índice é 100
+# aproximadamente 1% dos cenários simulados ficam na cauda esquerda até esse ponto
+indice_var <- ceiling(n * p)
+
+# Cálculo do VaR
+# O retorno no índice é negativo; o sinal negativo o converte em perda positiva
+# Aproximação para retorno log diário: 
+# perda ≈ -retorno * valor_carteira
+# Forma exata: 
+# valor_carteira * (1 - exp(ret_sim_ord[indice_var]))
+var_mc  <- -ret_sim_ord[indice_var] * valor_carteira
+var_pct <- -ret_sim_ord[indice_var] * 100
+
+# Resultado: limiar de perda de 1 dia que é excedido com probabilidade
+# aproximada de 1%, segundo a distribuição histórica reamostrada
+var_mc    # em reais
+var_pct   # em percentual
+
 ```
 
 ### E
 
 Calcule o Expected Shortfall histórico diário da carteira, em percentual e em reais.
+
+```{r}
+
+# VaR e ES empíricos na escala percentual
+# VaR: ponto de corte da cauda esquerda, expresso como perda positiva
+var_percentual <- -ret_sim_ord[indice_var] * 100
+
+# ES: média dos retornos na cauda esquerda, expressa como perda positiva
+es_percentual <- -mean(ret_sim_ord[1:indice_var]) * 100
+
+# Valores monetários
+var_monetario <- var_percentual / 100 * valor_carteira
+es_monetario <- es_percentual / 100 * valor_carteira
+
+# Resultados
+var_monetario
+es_monetario
+
+```
 
 ### F
 
