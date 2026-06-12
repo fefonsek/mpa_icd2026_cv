@@ -40,20 +40,20 @@ cenarios <- tibble(
 ## (a.2) Função que calcula o VPL de UM cenário.
 ## Traduza a fórmula do enunciado
 calcula_vpl <- function(investimento, receita_anual,
-valor_residual, taxa_desconto, duracao = 5) {
-    
-    # cria o vetor 1,2,...,duracao
-    anos <- seq_len(duracao)
-
-    # valor presente das receitas (constantes) ao longo dos anos
-    vp_receitas <- receita_anual * sum(1 / (1 + taxa_desconto) ^ anos)
-    
-    # valor presente do valor residual, recebido ao final
-    vp_residual <- valor_residual / (1 + taxa_desconto) ^ duracao
-    
-    # VPL é a soma dos valores presentes menos o investimento
-    vpl <- vp_receitas + vp_residual - investimento
-
+                        valor_residual, taxa_desconto, duracao = 5) {
+  
+  # cria o vetor 1,2,...,duracao
+  anos <- seq_len(duracao)
+  
+  # valor presente das receitas (constantes) ao longo dos anos
+  vp_receitas <- receita_anual * sum(1 / (1 + taxa_desconto) ^ anos)
+  
+  # valor presente do valor residual, recebido ao final
+  vp_residual <- valor_residual / (1 + taxa_desconto) ^ duracao
+  
+  # VPL é a soma dos valores presentes menos o investimento
+  vpl <- vp_receitas + vp_residual - investimento
+  
 } 
 
 ## (a.3) Aplique a função a todos os cenários com
@@ -72,7 +72,7 @@ vpl_sim <- simulacoes$vpl
 head(vpl_sim)
 
 ## (b) Probabilidade de o projeto destruir valor: (P(VPL < 0)).
-prob_vpl_neg <- mean(vpl < 0)
+prob_vpl_neg <- mean(vpl_sim < 0)
 
 # exibe a probabilidade em percentual
 prob_vpl_neg * 100
@@ -80,10 +80,24 @@ prob_vpl_neg * 100
 ## Interpretação (item b): escreva aqui sua resposta,
 ## como comentário
 
+## Com base em distribuição triangular, pode-se dizer que
+## há uma probabilidade de 23,21% do retorno do projeto
+## da Laticínios Serra Azul Ltda. dentro do período de 5 anos
+## resultar em prejuízo.
 
+## A probabilidade simulada de VPL < 0 é de aproximadamente 23.21%.
 
+## Esse resultado indica que, sob as hipóteses adotadas na simulação, 
+## há uma probabilidade relativamente baixa de a empresa apresentar 
+## VPL inferior a 0. Em termos financeiros, isso sugere que, em 
+## muitos cenários, a empresa não teria prejuízos em  uma nova linha
+## de produção de queijos especiais.
 
-
+## Essa conclusão depende diretamente das hipóteses do exercício. 
+## A simulação não afirma que a empresa necessariamente terá retorno 
+## positivo, nem que a receita líquida anual se manterá obrigatoriamente
+## constante ao longo dos anos, mas indica que o risco de o VPL ficar
+## abaixo do nível de referência relativamente baixo.
 
 
 ## (c) VPL determinístico (use as MODAS de cada parâmetro)
@@ -108,10 +122,22 @@ vpl_sd
 ## Interpretação (item c): escreva aqui sua resposta,
 ## como comentário
 
+## O VPL determinístico é igual a 101.41, enquanto o VPL médio 
+## simulado é igual a 85.96. Esses valores são distantes, 
+## representando uma variabilidade alta de possibilidade de retorno.
+## O VPL determinístico usa apenas os valores mais prováveis dentre
+## os parâmetros analisados. Já o VPL médio simulado considera todos 
+## os cenários gerados a partir das distribuições triangulares.
 
+## A simulação também permite observar a variabilidade do VPL. 
+## O desvio-padrão da distribuição dos índices simulados é igual a 
+## 114.43, o que mostra que a variabilidade do índice em torno de 
+## sua média é relativamente alta.
 
-
-
+## Portanto, a principal contribuição da simulação não é apenas 
+## calcular um valor médio, mas representar a incerteza em torno 
+## do indicador e estimar a probabilidade de ocorrência de situações
+## consideradas desfavoráveis.
 
 
 ## (d) Histograma da distribuição simulada
@@ -148,7 +174,7 @@ head(precos_vale3)
 
 retornos_vale3 <- precos_vale3 |>
   # fórmula do retorno log diário (use o preço ajustado)
-  mutate(ret = log(adjusted / lag(adjusted))) |>
+  mutate(ret = log(adjusted / dplyr::lag(adjusted))) |>
   drop_na() # remove o primeiro valor, que é NA
 
 ## extrai a coluna ret como um vetor
@@ -198,12 +224,131 @@ es_monetario
 
 ## (e) Interpretação: escreva aqui sua resposta, como comentário.
 
+# organiza os resultados em uma tibble
 
+horizonte <- "1 dia"
 
+resultado_exercicio_2 <- tibble(
+  medida = c("VaR histórico", "Expected Shortfall histórico"),
+  horizonte = horizonte,
+  percentual = c(var_percentual, es_percentual),
+  reais = c(var_monetario, es_monetario)
+)
 
+## exige os resultados
+resultado_exercicio_2
+
+## O VaR histórico para o horizonte de 1 dia, com p = 1%, é de 
+## aproximadamente 3.85%, ou R$ 962,80. Esse valor é o limiar de 
+## perda associado à cauda esquerda de 1% dos retornos diários 
+## observados. Com base no histórico usado, esse limiar de perda 
+## diária poderá ser ultrapassado em aproximadamente 1% dos dias. 
+## De modo equivalente, em aproximadamente 99% dos dias, a perda 
+## diária não deverá ultrapassar esse limiar. O VaR não é a perda 
+## máxima possível; ele é o ponto de corte da cauda de perdas.
+
+## O Expected Shortfall histórico para o horizonte de 1 dia, com 
+## p = 1%, é de aproximadamente 4.74%, ou R$ 1185.11. Esse valor 
+## corresponde à média das perdas localizadas na cauda além do VaR.
+## Assim, enquanto o VaR indica o limiar de perda associado a 
+## p = 1%, o ES resume a severidade média das perdas mais extremas.
 
 
 
 
 # Resolução da Questão 3 ----------------------------------------
 
+## (a) Importe os preços (ajustados), organize em formato largo
+## e calcule os retornos SIMPLES diários de cada ação.
+serie_precos <- c("ITUB4.SA", "VALE3.SA", "WEGE3.SA") |> 
+  tq_get(get = "stock.prices", 
+         from = "2024-01-01",
+         to = "2026-06-08") |>
+  select(symbol, date, adjusted) |>
+  pivot_wider(names_from = symbol, 
+              values_from = adjusted) |>
+  rename(dia = date,
+         itub4 = ITUB4.SA,
+         vale3 = VALE3.SA,
+         wege3 = WEGE3.SA)
+
+## retorno simples = preçoo / preço anterior -1
+retornos <- serie_precos |>
+  mutate(
+    ret_itub4 = itub4 / dplyr::lag(itub4) - 1,
+    ret_vale3 = vale3 / dplyr::lag(vale3) - 1,
+    ret_wege3 = wege3 / dplyr::lag(wege3) - 1
+  ) |>
+  drop_na()
+
+## (b) Calcule o retorno diário da carteira.
+
+## pesos da carteira, na ordem: itub4, vale3, wege3
+pesos <- c(itub4 = 0.4, vale3 = 0.35, wege3 = 0.25)
+
+retornos <- retornos |>
+  mutate(
+    ret_carteira = ret_itub4 * pesos["itub4"] + 
+      ret_vale3 * pesos["vale3"] + 
+      ret_wege3 * pesos["wege3"]
+  )
+
+## (c)-(d) Parâmetros e medidas de risco (VaR e ES)
+
+## parâmetros do problema
+valor_carteira <- 100000
+p <- 0.01
+
+## ordena os retornos do pior para o melhor
+ret_ordenado <- sort(retornos$ret_carteira)
+
+## posição do quantil de p
+k <- ceiling(p * length(ret_ordenado))
+
+## VaR em %, como perda positiva
+var_percentual <- -ret_ordenado[k] * 100
+
+## VaR em reais
+var_monetario <- valor_carteira * (-ret_ordenado[k])
+
+## ES em %, como perda positiva
+es_percentual <- -mean(ret_ordenado[1:k]) * 100
+
+## ES em reais
+es_monetario <- valor_carteira * (-mean(ret_ordenado[1:k]))
+
+## exibe os valores do VaR e do ES
+var_percentual
+var_monetario
+es_percentual
+es_monetario
+
+## (e) Interpretação: escreva aqui sua resposta, como comentário.
+
+## organiza os resultados em uma tibble
+
+horizonte <- "1 dia"
+  
+resultado_exercicio_3 <- tibble(
+  medida = c("VaR histórico", "Expected Shortfall histórico"),
+  horizonte = horizonte,
+  percentual = c(var_percentual, es_percentual),
+  reais = c(var_monetario, es_monetario)
+)
+
+## exige os resultados
+resultado_exercicio_3
+
+## O VaR histórico diário da carteira, com p = 1%, é de 
+## aproximadamente 2.48%, ou R$ 2482.86. Esse valor indica o limiar 
+## de perda diária da carteira associado a p = 1%. Com base no histórico 
+## usado, esse limiar poderá ser ultrapassado em aproximadamente 1% 
+## dos dias. De modo equivalente, em aproximadamente 99% dos dias, 
+## a perda diária da carteira não deverá ultrapassar esse valor.
+
+## O Expected Shortfall histórico diário da carteira, com p = 1%, é de 
+## aproximadamente 3.16%, ou R$ 3157.13. Esse valor corresponde à 
+## média das perdas mais severas.
+
+## Como o ES resume perdas ainda mais severas do que o ponto de 
+## corte usado no VaR, ele tende a ser maior em magnitude.
