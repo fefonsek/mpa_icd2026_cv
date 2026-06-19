@@ -1,0 +1,354 @@
+---
+title: "Introdução à Ciência de Dados"
+subtitle: "Códigos da Aula 14"
+author: "Prof. Washington Santos da Silva"
+lang: pt-BR
+date: 18/06/2026
+format:
+  html:
+    theme: flatly
+    embed-resources: true
+    toc: true
+    number-sections: true
+crossref:
+  fig-prefix: 'Fig.'
+  tbl-prefix: 'Tab.'
+execute:
+  echo: true
+  message: false
+  warning: false
+editor: source
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+# configura exibição de números
+options(digits = 5, scipen = 999)
+
+# pacotes necessarios
+library(tidyverse)
+library(infer)
+
+```
+
+
+## Introdução
+
+Este arquivo reúne, por tópico, o código usado na Aula 14 da disciplina 
+Introdução à Ciência de Dados
+
+
+
+
+## Configuração das simulações
+
+```{r}
+#| label: config
+
+# número de repetições das simulações (bootstrap e permutação)
+n_reps <- 5000
+
+# ordem da diferença: primeiro menos segundo, ou seja, B menos A
+ordem_ab <- c("B - redesenhada", "A - atual")
+```
+
+
+
+
+## Dados do experimento A/B
+
+```{r}
+#| label: dados-ab
+
+# tempos de permanência (minutos) observados na versão atual (A)
+versao_a <- c(
+  3.2, 4.1, 2.8, 3.9, 3.5, 4.3, 2.9, 3.7, 4.0, 3.3,
+  2.6, 3.8, 4.2, 3.1, 3.6, 2.7, 4.5, 3.4, 2.5, 3.9
+)
+
+# tempos de permanência observados na versão redesenhada (B)
+versao_b <- c(
+  3.8, 4.2, 3.3, 4.6, 3.7, 4.1, 3.9, 4.4, 3.5, 4.0,
+  3.6, 4.3, 3.4, 4.7, 3.8, 4.5, 3.2, 4.8, 3.7, 4.2
+)
+
+# organiza os dados em formato tidy
+dados_ab <- tibble(
+  versao = factor(
+    rep(c("A - atual", "B - redesenhada"), each = 20),
+    levels = c("A - atual", "B - redesenhada")
+  ),
+  tempo_min = c(versao_a, versao_b)
+)
+
+# exibe as primeiras linhas
+head(dados_ab)
+
+```
+
+
+
+```{r}
+#| label: espia-ab
+
+# espia algumas observações de cada versão
+dados_ab |>
+  slice(c(1:5, 16:20, 21:25, 36:40))
+```
+
+```{r}
+#| label: obs-ab
+
+# diferença observada (B menos A) com o infer
+obs_ab <- dados_ab |>
+  specify(tempo_min ~ versao) |>
+  calculate(stat = "diff in means", order = ordem_ab)
+
+# resumos reutilizados nas seções seguintes
+media_a_observada <- mean(versao_a)
+media_b_observada <- mean(versao_b)
+dp_a_observado <- sd(versao_a)
+dp_b_observado <- sd(versao_b)
+n_por_grupo_ab <- length(versao_a)
+diferenca_ab_observada <- obs_ab |> pull(stat)
+
+# exibe a diferença observada
+obs_ab
+```
+
+
+
+
+## Resumo por grupo
+
+```{r}
+#| label: resumo-ab
+
+# calcula o resumo descritivo por versão da página
+resumo_ab <- dados_ab |>
+  group_by(versao) |>
+  summarise(
+    n = n(),
+    media_tempo = mean(tempo_min),
+    desvio_padrao = sd(tempo_min),
+    erro_padrao_media = desvio_padrao / sqrt(n)
+  )
+
+# exibe o resumo que será usado na interpretação
+resumo_ab
+```
+
+
+
+
+## Estimativa pontual do efeito
+
+```{r}
+#| label: estimativa-ab
+
+# reúne as médias observadas e a diferença B menos A
+tibble(
+  media_a = media_a_observada,
+  media_b = media_b_observada,
+  diferenca_b_menos_a = diferenca_ab_observada
+)
+```
+
+
+
+
+## Bootstrap com infer: intervalo de confiança
+
+```{r}
+#| label: bootstrap-ab
+
+# fixa a semente para reproduzir as reamostragens
+set.seed(2026)
+
+# gera a distribuição bootstrap da diferença de médias
+boot_ab <- dados_ab |>
+  specify(tempo_min ~ versao) |>
+  generate(reps = n_reps, type = "bootstrap") |>
+  calculate(stat = "diff in means", order = ordem_ab)
+
+# calcula o intervalo de confiança pelo método percentil
+ic_boot_ab <- boot_ab |>
+  get_confidence_interval(level = 0.95, type = "percentile")
+
+# reúne a estimativa original, o erro-padrão e os limites do intervalo
+tibble(
+  estimativa_original = diferenca_ab_observada,
+  erro_padrao_boot = sd(boot_ab$stat),
+  limite_inferior = ic_boot_ab$lower_ci,
+  limite_superior = ic_boot_ab$upper_ci
+)
+```
+
+
+```{r}
+#| label: graf-bootstrap
+#| fig-width: 8
+#| fig-height: 4.8
+
+# visualiza a distribuição bootstrap
+ggplot(boot_ab, aes(x = stat)) +
+  geom_histogram(bins = 40, fill = "steelblue", color = "white", alpha = 0.85) +
+  geom_vline(
+    xintercept = c(ic_boot_ab$lower_ci, ic_boot_ab$upper_ci),
+    linewidth = 1,
+    linetype = "dashed",
+    color = "#333333"
+  ) +
+  geom_vline(
+    xintercept = diferenca_ab_observada,
+    linewidth = 1.2,
+    color = "#C23B22"
+  ) +
+  labs(
+    x = "Diferença média bootstrap: B - A",
+    y = "Frequência",
+    title = "Intervalo de confiança via bootstrap"
+  )
+```
+
+
+
+
+## 8. Teste de permutação
+
+```{r}
+#| label: dif-observada
+
+# relembra o resumo descritivo por versão
+resumo_ab
+
+# exibe a estatística observada que será comparada com a hipótese nula
+obs_ab |>
+  rename(diferenca_observada_b_menos_a = stat)
+```
+
+
+
+```{r}
+#| label: permutacao
+
+# fixa a semente para reproduzir as permutações
+set.seed(2026)
+
+# gera a distribuição nula embaralhando os rótulos A e B
+dist_nula_ab <- dados_ab |>
+  specify(tempo_min ~ versao) |>
+  hypothesize(null = "independence") |>
+  generate(reps = n_reps, type = "permute") |>
+  calculate(stat = "diff in means", order = ordem_ab)
+
+# calcula o valor-p bilateral a partir da distribuição nula
+dist_nula_ab |>
+  get_p_value(obs_stat = obs_ab, direction = "two-sided")
+```
+
+
+```{r}
+#| label: graf-permutacao
+#| fig-width: 8
+#| fig-height: 4.8
+
+# visualiza a distribuição nula e destaca valores tão extremos quanto o observado
+dist_nula_ab |>
+  visualize() +
+  shade_p_value(obs_stat = obs_ab, direction = "two-sided") +
+  labs(
+    x = "Diferença de médias sob H0",
+    y = "Frequência",
+    title = "Teste por permutação"
+  )
+```
+
+
+
+
+## Exercícios — experimento de incentivos
+
+```{r}
+#| label: dados-incentivos
+
+# ordem da diferença: monetário menos não monetário
+ordem_incentivos <- c("Incentivo monetário", "Incentivo não monetário")
+
+# produtividade semanal no grupo com incentivo monetário
+produtividade_monetario <- c(
+  52, 52, 52, 55, 44, 52, 54, 52, 54, 56,
+  56, 48, 55, 54, 50, 44, 57, 46, 51, 54
+)
+
+# produtividade semanal no grupo com incentivo não monetário
+produtividade_nao_monetario <- c(
+  55, 45, 47, 48, 48, 49, 42, 50, 51, 47,
+  48, 55, 47, 48, 52, 48, 50, 46, 54, 50
+)
+
+# organiza os dados do experimento sobre incentivos
+dados_incentivos <- tibble(
+  grupo = factor(
+    rep(ordem_incentivos, each = 20),
+    levels = ordem_incentivos
+  ),
+  produtividade = c(produtividade_monetario, produtividade_nao_monetario)
+)
+```
+
+
+
+```{r}
+#| label: resumo-incentivos
+
+# calcula o resumo descritivo por tipo de incentivo
+dados_incentivos |>
+  group_by(grupo) |>
+  summarise(
+    n = n(),
+    media_produtividade = mean(produtividade),
+    desvio_padrao = sd(produtividade)
+  )
+```
+
+
+
+### Exercício 1 — Bootstrap
+
+Estime, por bootstrap, um intervalo de confiança de 95% para a diferença média de
+produtividade ($\Delta = \mu_{\text{monetário}} - \mu_{\text{não monetário}}$).
+Sequência sugerida: `specify()` → `generate(type = "bootstrap")` →
+`calculate(stat = "diff in means", order = ordem_incentivos)` →
+`get_confidence_interval(level = 0.95)`. Interprete em uma frase.
+
+```{r}
+#| label: ex1
+
+# escreva sua resolução aqui
+
+```
+
+
+
+
+### Exercício 2 — Teste por permutação
+
+Teste, por permutação, se o tipo de incentivo altera a produtividade média.
+Sequência: `specify()` → `hypothesize(null = "independence")` →
+`generate(type = "permute")` → `calculate(...)` → `get_p_value(...)`.
+Interprete a diferença observada, o valor-p e a condição do desenho que sustenta a
+leitura causal.
+
+```{r}
+#| label: ex2
+
+# escreva sua resolução aqui
+
+```
+
+
+
+
