@@ -328,9 +328,35 @@ Sequência sugerida: `specify()` → `generate(type = "bootstrap")` →
 #| label: ex1
 
 # escreva sua resolução aqui
+# fixa a semente para reprodutibilidade
+set.seed(2026)
+
+# diferença observada na amostra (estimativa pontual)
+obs_incentivos <- dados_incentivos |>
+  specify(produtividade ~ grupo) |>
+  calculate(stat = "diff in means", order = ordem_incentivos)
+
+# distribuição bootstrap da diferença de médias
+boot_incentivos <- dados_incentivos |>
+  specify(produtividade ~ grupo) |>
+  generate(reps = n_reps, type = "bootstrap") |>
+  calculate(stat = "diff in means", order = ordem_incentivos)
+
+# intervalo de confiança de 95% pelo método percentil
+ic_boot_incentivos <- boot_incentivos |>
+  get_confidence_interval(level = 0.95, type = "percentile")
+
+# exibe estimativa pontual e IC
+tibble(
+  estimativa = obs_incentivos |> pull(stat),
+  erro_padrao_boot = sd(boot_incentivos$stat),
+  limite_inferior  = ic_boot_incentivos$lower_ci,
+  limite_superior  = ic_boot_incentivos$upper_ci
+)
 
 ```
 
+Com base em 5.000 reamostragems bootstrap, estima-se que a diferença média de produtividade entre o grupo com incentivo monetário e o grupo com incentivo não monetário está entre 0,68 e 4,97 unidades com 95% de confiança, e como o intervalo não inclui o zero, há evidência amostral de que o incentivo monetário tende a produzir maior produtividade média do que o incentivo não monetário.
 
 
 
@@ -346,9 +372,38 @@ leitura causal.
 #| label: ex2
 
 # escreva sua resolução aqui
+# fixa a semente para reprodutibilidade
+set.seed(2026)
+
+# gera a distribuição nula embaralhando os rótulos dos grupos
+dist_nula_incentivos <- dados_incentivos |>
+  specify(produtividade ~ grupo) |>
+  hypothesize(null = "independence") |>
+  generate(reps = n_reps, type = "permute") |>
+  calculate(stat = "diff in means", order = ordem_incentivos)
+
+# calcula o valor-p bilateral
+dist_nula_incentivos |>
+  get_p_value(obs_stat = obs_incentivos, direction = "two-sided")
+
+# visualiza a distribuição nula com a estatística observada destacada
+dist_nula_incentivos |>
+  visualize() +
+  shade_p_value(obs_stat = obs_incentivos, direction = "two-sided") +
+  labs(
+    x     = "Diferença de médias sob H0",
+    y     = "Frequência",
+    title = "Teste por permutação — incentivos"
+  )
 
 ```
 
+Diferença observada: o grupo com incentivo monetário apresentou produtividade média superior ao grupo com incentivo não monetário em aproximadamente 2,83 unidades semanais.
 
+Valor-p: o valor-p bilateral foi de 0,0124, ou seja, em apenas 1,24% das 5.000 permutações sob H₀ observou-se uma diferença tão extrema quanto a encontrada nos dados reais. Como p < 0,05, rejeita-se a hipótese nula de independência entre tipo de incentivo e produtividade.
 
+Condição do desenho que sustenta a leitura causal: o experimento utilizou atribuição aleatória para definir qual funcionário recebeu cada tipo de incentivo. Isso neutraliza diferenças sistemáticas pré-existentes entre os grupos: engajamento, perfil, senioridade, tornando crível atribuir a diferença observada ao tipo de incentivo em si, e não a características dos participantes. Sem essa aleatorização, a mesma diferença numérica seria apenas uma associação, não um efeito causal defensável.
+
+OBSERVAÇÃO:
+Vale notar a coerência entre os dois exercícios: o IC bootstrap (0,68 a 4,97) não inclui zero e o valor-p da permutação (0,0124) é menor que 0,05. Os dois métodos apontam na mesma direção, reforçando a conclusão de que o incentivo monetário eleva a produtividade média no contexto estudado.
 
