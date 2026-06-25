@@ -1,0 +1,17 @@
+id_instituicao,nome_instituicao,tipo_instituicao,uf,regiao,ano_inicio
+IF001,Banco Atlantico S.A.,Banco,SP,Sudeste,1984
+IF002,Banco Planalto S.A.,Banco,DF,Centro-Oeste,1991
+IF003,Banco Sul Brasileiro S.A.,Banco,RS,Sul,1978
+IF004,Banco Nordeste Digital S.A.,Banco,CE,Nordeste,2015
+IF005,Banco Minas Gerais S.A.,Banco,MG,Sudeste,1989
+IF006,Banco Amazonia Verde S.A.,Banco,PA,Norte,2008
+IF007,Coop Credito Vale do Itajai,Cooperativa de credito,SC,Sul,1997
+IF008,Coop Serra Gaucha,Cooperativa de credito,RS,Sul,1994
+IF009,Coop Credito Cerrado,Cooperativa de credito,GO,Centro-Oeste,2001
+IF010,Coop Agro Parana,Cooperativa de credito,PR,Sul,1996
+IF011,Banco Capital Digital S.A.,Banco,SP,Sudeste,2018
+IF012,Coop Credito Litoral Bahia,Cooperativa de credito,BA,Nordeste,2004
+IF013,Banco Centro-Oeste S.A.,Banco,MT,Centro-Oeste,2007
+IF014,Coop Cafe Minas,Cooperativa de credito,MG,Sudeste,1992
+IF015,Banco Pernambuco S.A.,Banco,PE,Nordeste,1982
+IF016,Coop Norte Rural,Cooperativa de credito,RO,Norte,2006

@@ -1,0 +1,155 @@
+---
+lang: pt-BR
+title: "Resolução Avaliação 3"
+subtitle: "Introdução à Ciência de Dados - 2026/1 <br> Mestrado Profissional em Administração"
+author: "Felipe Fonseca"
+date: 2026-06-25
+date-format: long
+title-block-banner: "#27445C"
+format:
+  html:
+    embed-resources: true
+    toc: true
+execute:
+  echo: true
+  warning: false
+  message: false
+editor: source
+---
+
+
+```{r}
+#| label: setup
+#| echo: true
+
+# configura a exibição de números
+options(digits = 3, scipen = 99)
+
+# Carrega os pacotes necessários
+library(here) # para usar caminhos relativos de arquivos
+library(tidyverse)  # Inclui readr, dplyr, tidyr, ggplot2, etc.
+  
+```
+
+
+
+# Questão 1 
+
+
+## A
+
+```{r}
+# caminhos relativos dos arquivos CSV
+instituicoes_financeiras_csv <- here("data/raw/instituicoes_financeiras.csv")
+indicadores_contabeis_csv <-  here("data/raw/indicadores_contabeis.csv")
+carteira_credito_csv <- here("data/raw/carteira_credito.csv")
+
+# importacao dos arquivos CSV
+instituicoes_financeiras <- read_csv(instituicoes_financeiras_csv)
+indicadores_contabeis <- read_csv(indicadores_contabeis_csv)
+carteira_credito <- read_csv(carteira_credito_csv)
+
+# pipeline para combinar as 3 tabelas
+dados_financeiros <- indicadores_contabeis |>
+  # primeiro join: adiciona a carteira de credito
+  left_join(carteira_credito, by = c("id_instituicao", "ano")) |>
+  # segundo join: adiciona o cadastro das instituicoes
+  left_join(instituicoes_financeiras, by = "id_instituicao")
+
+# verifica a estrutura dos dados combinados
+glimpse(dados_financeiros)
+view(dados_financeiros)
+
+# exibe as 10 primeiras linhas
+head(dados_financeiros,10)
+```
+
+
+
+
+## B
+
+```{r}
+# resumo por instituicao
+resumo_instituicoes <- dados_financeiros |>
+  # cria o indicador de rentabilidade
+  mutate(roa = resultado_liquido / ativo_total) |>
+  # agrupa pelo codigo e pelo nome da instituicao
+  group_by(id_instituicao, nome_instituicao) |>
+  # calcula as médias agrupadas do periodo 
+  summarise(
+    media_ativo_total = mean(ativo_total, na.rm = TRUE),
+    media_carteira_credito = mean(carteira_credito, na.rm = TRUE),
+    media_inadimplencia = mean(inadimplencia, na.rm = TRUE),
+    roa_medio = mean(roa, na.rm = TRUE)
+  ) |>
+  # seleciona as variaveis finais
+  select(id_instituicao, nome_instituicao, media_ativo_total, media_carteira_credito, media_inadimplencia, roa_medio)
+
+# verifica a estrutura do resumo
+glimpse(resumo_instituicoes)
+view(resumo_instituicoes)
+
+# exibe as 10 primeiras linhas
+head(resumo_instituicoes, 10)
+```
+
+
+
+
+
+# Questão 2 
+
+
+## A
+Imbes distingue os problemas da seguinte forma:
+
+### Problemas de estimação
+Focam em determinar a magnitude (estimativa pontual) de um efeito e o seu grau 
+de incerteza associado. Na maioria das pesquisas econômicas aplicadas, como no 
+retorno da educação, o interesse reside em quão grande é o efeito e não apenas 
+se ele existe.
+
+### Problemas de teste de Hipótese
+Destinam-se a avaliar teorias específicas onde a hipóterse nula de um efeito 
+exatamente zero faz sentido teórico (ex.: hipótese de mercados eficientes ou 
+precognição).
+
+### Análise do foco
+O foco excessivo na hipótese nula de efeito zero e no limiar de p<0,05 desvia a
+atenção da pergunta substativa, pelos seguintes motivos:  
+1 - A hipótese nula costuma ser implausível;  
+2 - Ignora a importância prática;  
+3 - Leva a interpretações errôneas.  
+Em economia, raramente acredita-se que um efeito seja exatamente zero e, 
+portanto, rejeitar essa nulidade traz pouca informação nova. Assim como um 
+resultado pode ser estatisticamente significativo, mas ter uma magnitude 
+irrelevante, ou vice-versa.  
+O foco binário faz com que tomadores de decisão interpretem resultados "não 
+significativos" incorretamente, como se o efeito fosse "zero", ignorando a 
+incerteza real. Basicamente, tomam como verdade algo que poderia ser refutado
+em termos práticos.
+
+## B
+Com base nos argumentos de Imbes, as recomendações para o relato de resultados 
+empíricos são:
+
+### Apresentação de estimativas e incerteza
+Pesquisadores devem priorizar o relato de intervalos de confiança ou, 
+preferencialmente, intervalos posteriores bayesianos (Bayesian posterior
+intervals) e erros padrão para comunicar a incerteza das estimativas pontuais.
+Isso permite que o leitor veja a gama de valores plausíveis para o efeito.
+
+### Uso de valores-p para comunicar evidência (não binário)
+Quando o problema for genuinamente um teste de hipótese, deve-se relatar o
+valor-p exato como uma medida contínua de evidência contra a hipótese nula, em
+vez de reduzi-lo a um indicador binário (significativo/não significativo).
+Imbes recomenda explicitamente não utilizar "estrelas" (\*, \**, \***) nas 
+tabelas para indicar níveis de significância.
+
+### Redução de incentivos
+A adoção de planos de pré-análise (pre-analysis plans), onde o pesquisador
+especifica antecipadamente como os dados serão coletados e analisados, é 
+fundamental para reduzir o espaço para buscas por especificações favoráveis.
+Além disso, deve-se diminuir a importância dada aos limiares de significância
+para reduzir os incentivos ao p-hacking.
